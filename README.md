@@ -55,6 +55,7 @@ This is a real result. The site's robots.txt allowed GPTBot, but the host's CDN 
 | `OK` | The crawler gets your page | Nothing to do |
 | `BLOCKED by robots.txt` | Your robots.txt disallows this crawler | robots.txt (only if you want it allowed) |
 | `BLOCKED at server/CDN` | The server refuses the crawler while browsers get 200 | Host / CDN / WAF bot-protection or AI-crawler settings |
+| `BLOCKED? no response` | The crawler's request timed out or was dropped while a browser got through (firewalls often stall bots) | Host / CDN / WAF bot-protection; re-run to rule out a one-off timeout |
 | `refused spoofed UA (normal)` | Googlebot and Bingbot are verified by IP, so a fake user-agent is refused on purpose | Confirm real access with Google Search Console URL Inspection / Bing Webmaster Tools |
 | `allowed (robots-only token)` | `Google-Extended` and `Applebot-Extended` are opt-out tokens, not separate crawlers | robots.txt |
 

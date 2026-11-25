@@ -62,11 +62,16 @@ def fetch(url: str, ua: str, timeout: float = 15.0) -> tuple[int | None, str]:
         return None, ""
 
 
-def verdict(robots_ok: bool, status: int | None, baseline: int | None, verified: bool) -> str:
+def verdict(robots_ok: bool, status: int | None, baseline: int | None, verified: bool, live: bool = True) -> str:
     if not robots_ok:
         return "BLOCKED by robots.txt"
+    if not live:
+        return "allowed (robots-only token)"
     if status is None:
-        return "allowed (robots-only token)" if baseline is not None else "unreachable"
+        # The bot's request got no answer while a browser did: firewalls often drop or stall bots.
+        if baseline is not None and 200 <= baseline < 400:
+            return "BLOCKED? no response (timeout or dropped connection) while a browser got through"
+        return "unreachable"
     if 200 <= status < 400:
         return "OK"
     if verified and status in (403, 429):
@@ -92,7 +97,7 @@ def check(site: str, path: str) -> dict:
     for token, purpose, ua, verified in CRAWLERS:
         allowed = rp.can_fetch(token, target)
         status = fetch(target, ua)[0] if ua else None
-        results.append(Result(token, purpose, allowed, status, verdict(allowed, status, baseline, verified)))
+        results.append(Result(token, purpose, allowed, status, verdict(allowed, status, baseline, verified, ua is not None)))
         time.sleep(0.4)  # be polite
 
     blocked = [r.bot for r in results if r.verdict.startswith("BLOCKED")]
